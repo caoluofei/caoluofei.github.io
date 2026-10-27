@@ -163,6 +163,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--mon
 .end{text-align:center;padding-block:110px 90px}
 .ty{font-family:var(--mincho);font-weight:800;font-size:clamp(44px,8vw,76px);letter-spacing:.04em;color:#fff;margin:10px 0}
 .mail{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px;font-family:var(--mono);font-size:15px;color:#fff}
+.sk{min-width:0}.sk-tr{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;overscroll-behavior-x:contain;cursor:grab}.sk-tr::-webkit-scrollbar{display:none}.sk-tr.drag{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto}.sl{flex:0 0 62%;scroll-snap-align:start;min-width:0}.sl .fr img{aspect-ratio:927/1200;object-fit:contain;background:#fff}.sk-nav{display:flex;align-items:center;gap:14px;margin-top:14px}.sk-ct{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--dim);min-width:64px;text-align:center}.sk-nav .btn:disabled{opacity:.3;cursor:default;background:transparent;color:var(--hazard)}@media (max-width:760px){.sl{flex-basis:85%}}
 .btn{font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:7px 12px;background:transparent;color:var(--hazard);border:0.5px solid var(--hazard);cursor:pointer}
 .btn:hover{background:var(--hazard);color:var(--panel)}
 .back{margin-top:56px}
@@ -315,7 +316,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--mon
 <div class="info"><span class="lab">SKETCHES</span>
 <h3>スケッチ</h3>
 <p class="concept" style="margin-top:0">オリジナルクリーチャーのデザインスケッチ。</p></div>
-<div class="g2"><div><figure class="fr"><img src="img/nyx.jpg" width="927" height="1200" style="aspect-ratio:927/1200;object-fit:contain;background:#fff" loading="lazy" alt="Nyx スケッチ"></figure><div class="cap"><b>Nyx</b></div></div><div><figure class="fr"><img src="img/kv1.jpg" width="898" height="1200" style="aspect-ratio:927/1200;object-fit:contain;background:#fff" loading="lazy" alt="K-V1 スケッチ"></figure><div class="cap"><b>K-V1</b></div></div></div>
+<div class="sk"><div class="sk-tr" id="skt"><div class="sl"><figure class="fr"><img src="img/nyx.jpg" width="927" height="1200" loading="lazy" draggable="false" alt="Nyx スケッチ"></figure><div class="cap"><b>Nyx</b></div></div><div class="sl"><figure class="fr"><img src="img/kv1.jpg" width="927" height="1200" loading="lazy" draggable="false" alt="K-V1 スケッチ"></figure><div class="cap"><b>K-V1</b></div></div></div><div class="sk-nav"><button type="button" class="btn" id="skp" aria-label="前へ">◀ PREV</button><span class="sk-ct" id="skc">01 / 02</span><button type="button" class="btn" id="skn" aria-label="次へ">NEXT ▶</button></div></div>
 </div>
 </section>
 
@@ -505,6 +506,15 @@ window.addEventListener('touchend',e=>{if(ty==null||tr8||!lb.hidden)return;const
 document.addEventListener('keydown',e=>{if(!lb.hidden){if(e.key==='Escape')lb.hidden=true;return}if(page===1&&(e.key===' '||e.key==='Enter')){e.preventDefault();toggle()}
 else if(page===1&&(e.key==='ArrowDown'||e.key==='PageDown')){e.preventDefault();exitCover()}
 else if(page===2&&(e.key==='ArrowUp'||e.key==='PageUp')&&$('p2').scrollTop<=0){e.preventDefault();enterCover()}});
+(function(){const tr=$('skt');if(!tr)return;const sl=[...tr.children],N=sl.length,pv=$('skp'),nx=$('skn'),ct=$('skc');const pad=n=>String(n).padStart(2,'0');
+function idx(){let b=0,d=1e9;sl.forEach((e,i)=>{const k=Math.abs(e.offsetLeft-tr.offsetLeft-tr.scrollLeft);if(k<d){d=k;b=i}});return b}
+function upd(){const i=idx(),end=tr.scrollLeft+tr.clientWidth>=tr.scrollWidth-4;ct.textContent=pad(end?N:i+1)+' / '+pad(N);pv.disabled=tr.scrollLeft<=4;nx.disabled=end}
+function go(i){i=Math.max(0,Math.min(N-1,i));tr.scrollTo({left:sl[i].offsetLeft-tr.offsetLeft,behavior:'smooth'})}
+pv.addEventListener('click',()=>go(idx()-1));nx.addEventListener('click',()=>go(idx()+1));tr.addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);
+let sx=0,sl0=0,dn=false,mv=false;tr.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;dn=true;mv=false;sx=e.clientX;sl0=tr.scrollLeft});
+addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-sx;if(Math.abs(dx)>5){mv=true;tr.classList.add('drag')}if(mv)tr.scrollLeft=sl0-dx});
+addEventListener('pointerup',()=>{if(!dn)return;dn=false;if(mv){const i=idx();tr.classList.remove('drag');go(i)}});
+tr.addEventListener('click',e=>{if(mv){e.stopPropagation();e.preventDefault();mv=false}},true);upd()})();
 theme(G);log('[SYS] HEX GRID ONLINE');log('[OK] CORE STABLE');log('[OK] ALL SYSTEMS NOMINAL');
 </script>
 
