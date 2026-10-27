@@ -104,9 +104,9 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--mon
 #sh .chev svg:nth-child(3){animation-delay:.4s}
 @keyframes chv{0%,100%{opacity:.15}30%{opacity:1}}
 @keyframes shp{0%,100%{box-shadow:0 0 8px rgba(201,162,39,.25)}50%{box-shadow:0 0 18px rgba(201,162,39,.6)}}
-@keyframes crt{0%{transform:translate(-50%,-50%) scale(1,1);filter:brightness(1);opacity:1}25%{transform:translate(-50%,-50%) scale(1.03,1.08);filter:brightness(2.2)}55%{transform:translate(-50%,-50%) scale(1,.02);filter:brightness(3)}75%{transform:translate(-50%,-50%) scale(.4,.02);opacity:1}100%{transform:translate(-50%,-50%) scale(0,0);opacity:0}}
+@keyframes crt{0%{transform:translate(-50%,-50%) scale(1,1);filter:brightness(1);opacity:1}25%{transform:translate(-50%,-50%) scale(1.03,1.08);filter:brightness(2.2)}55%{transform:translate(-50%,-50%) scale(1,.02);filter:brightness(3)}75%{transform:translate(-50%,-50%) scale(.4,.02);opacity:1}100%{transform:translate(-50%,-50%) scale(0,0);opacity:0}}@keyframes crtOn{0%{transform:translate(-50%,-50%) scale(1,1);filter:brightness(1);opacity:1}25%{transform:translate(-50%,-50%) scale(1.03,1.08);filter:brightness(2.2)}55%{transform:translate(-50%,-50%) scale(1,.02);filter:brightness(3)}75%{transform:translate(-50%,-50%) scale(.4,.02);opacity:1}100%{transform:translate(-50%,-50%) scale(0,0);opacity:0}}
 #bx.off{animation:crt .45s cubic-bezier(.7,0,.9,.5) forwards}
-#bx.on{animation:crt .5s ease-out reverse both}
+#bx.on{animation:crtOn .5s ease-out reverse both}
 #p2{position:absolute;inset:0;z-index:10;background:var(--bg);overflow-y:auto;opacity:0;visibility:hidden;transition:opacity .4s,visibility 0s .4s;font-family:var(--sans);user-select:text;-webkit-user-select:text}
 #p2.show{opacity:1;visibility:visible;transition:opacity .4s}
 #p2 .ph{position:sticky;top:0;z-index:5;background:var(--panel)}
