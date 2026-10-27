@@ -389,19 +389,20 @@ async function flash(c,n,ms){const f=$('fl');f.style.transition='none';f.style.b
 function log(t,clear){const lg=$('lg');if(clear)lg.innerHTML='';const d=document.createElement('div');d.textContent=t;lg.appendChild(d);while(lg.children.length>3)lg.firstChild.remove()}
 function txt(o){for(const k in o)$(k).textContent=o[k]}
 function setSub(k){sub=S[k];$('rl').textContent=sub}
-async function berserk(){busy=true;
+async function berserk(auto){busy=true;
 log('[WARN] SYNC RATE ABNORMAL',true);chaos=0.7;
 for(let i=0;i<6;i++){const p=i%2?G:R;allFill(p.hi);theme(p);await sleep(80)}
 theme(R);setMode('bz');wave(R,'center',450);setSub('bz');chaos=1;await flash(R.hi,2,70);
 $('al').classList.add('blink');
 txt({st:'ALERT / MAXIMUM',al:'/// CONTAINMENT FAILURE ///',er:'ERR: 0x0000BAAA',hint:'CLICK TO REBOOT'});
 log('[FATAL] HEXAGON BARRIER DESTROYED');await sleep(300);
-log('[PANIC] CORE BERSERK');await sleep(200);log('[FAIL] CONTROL LOST');state='bz';busy=false}
-async function recover(){busy=true;
+log('[PANIC] CORE BERSERK');await sleep(200);log('[FAIL] CONTROL LOST');state='bz';busy=false;
+if(auto){while(state==='bz'&&bc<3)await sleep(40);if(state==='bz'&&!busy&&page===1&&!tr8){await recover(1000);await sleep(400);exitCover()}}}
+async function recover(rd){busy=true;
 setMode('rc');log('[SYS] REBOOT COMMAND ACCEPTED',true);await flash('#ffffff',2,50);chaos=0.6;await flash(R.hi,1,60);
 theme(A);setSub('rc');txt({st:'RECOVERING',al:'/// REBOOT SEQUENCE ///',er:'ERR: --------',hint:'RECOVERING…'});
 $('al').classList.remove('blink');
-wave(A,'left',500);chaos=0.5;log('[SYS] CORE COOLING DOWN');$('rb').hidden=false;await rebuild(1500);
+wave(A,'left',500);chaos=0.5;log('[SYS] CORE COOLING DOWN');$('rb').hidden=false;await rebuild(rd||1500);
 for(let i=0;i<4;i++){const p=i%2?A:G;allFill(p.hi);theme(p);await sleep(80)}
 theme(G);setMode('ok');wave(G,'center',450);chaos=0.06;setSub('ok');
 txt({st:'STATUS / NORMAL',al:'ALL SYSTEMS NOMINAL',er:'OK: 0x00000000',hint:'CLICK TO ALERT'});
@@ -452,7 +453,7 @@ $('snd').addEventListener('keydown',e=>e.stopPropagation());
 document.addEventListener('visibilitychange',()=>{if(!ac)return;document.hidden?ac.suspend():ac.resume()});
 const ct=$('ct'),fine=matchMedia('(hover:hover) and (pointer:fine)');let ctTxt='',overBx=false;
 function updCt(){const s=(busy?'WAIT':'CLICK')+'<small>→ '+(busy?'PROCESSING':state==='ok'?'ALERT':'REBOOT')+'</small>';if(s!==ctTxt){ct.innerHTML=s;ctTxt=s}}
-function toggle(){initAudio();if(busy||page!==1||tr8)return;state==='ok'?berserk():recover();updCt()}
+function toggle(){initAudio();if(busy||page!==1||tr8)return;state==='ok'?berserk(true):recover();updCt()}
 $('bx').addEventListener('click',e=>{e.stopPropagation();toggle()});
 $('bx').addEventListener('mouseenter',()=>{overBx=true;if(fine.matches&&!tr8){updCt();ct.style.opacity=1}});
 $('bx').addEventListener('mouseleave',()=>{overBx=false;ct.style.opacity=0});
