@@ -411,8 +411,13 @@ function drawFish(f,now){const x=Math.round(f.x),y=Math.round(f.y),d=f.dir,fl=Ma
 let treasure=null,treasureT=45000+Math.random()*40000,sand=[];
 // ---- day & night from the real clock (#night or #day in the link forces one) ----
 function daylight(){if(location.hash==='#night')return 0;if(location.hash==='#day')return 1;
-  const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  if(h>=7&&h<18.5)return 1;if(h>=6&&h<7)return h-6;if(h>=18.5&&h<19.5)return 1-(h-18.5);return 0}
+  const d=new Date(),h=d.getHours()+d.getMinutes()/60,{rise,set}=sunTimes(d);
+  if(h>=rise+.5&&h<set-.5)return 1;if(h>=rise-.5&&h<rise+.5)return h-(rise-.5);if(h>=set-.5&&h<set+.5)return 1-(h-(set-.5));return 0}
+// sunrise and sunset for today; longitude from the time zone, latitude 35°N (central Japan) as the default
+function sunTimes(d){const N=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5),rad=Math.PI/180,lat=35;
+  const decl=23.44*Math.sin(2*Math.PI*(284+N)/365),B=2*Math.PI*(N-81)/364,eot=9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);
+  const noon=12-eot/60,c=(Math.sin(-.833*rad)-Math.sin(lat*rad)*Math.sin(decl*rad))/(Math.cos(lat*rad)*Math.cos(decl*rad));
+  const H=Math.acos(Math.max(-1,Math.min(1,c)))/rad/15;return{rise:noon-H,set:noon+H}}
 let L=daylight(),prevNight=L<.3;setInterval(()=>{L=daylight()},5000);addEventListener('hashchange',()=>{L=daylight()});
 const hash=(a,b)=>{const s=Math.sin(a*127.1+b*311.7)*43758.5;return s-Math.floor(s)};
 // ---- depth of field: a hazy far layer, a blurred near layer, drifting particles at mixed depths ----
