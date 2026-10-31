@@ -314,6 +314,11 @@ function drawNestFront(){
   [[-14,'#a3b0b6',3],[-8,'#8f9ba3',2],[1,'#bfa274',3],[8,'#a3b0b6',2],[12,'#efdcb0',2]].forEach(([o,c,w])=>{px(NC+o,FLOOR-4,w,2,c);px(NC+o,FLOOR-4,1,1,'rgba(255,255,255,.35)')});
   st.items.slice(0,12).forEach((t,i)=>drawItem(t,NC-13+(i%6)*5+(i>5?2:0),FLOOR-3-(i>5?2:0)));
 }
+function drawLens(){const w=cv.width,hh=cv.height,v=ctx.createRadialGradient(w/2,hh*.45,hh*.35,w/2,hh*.5,w*.62);
+  v.addColorStop(0,'rgba(10,30,50,0)');v.addColorStop(1,'rgba(10,30,50,.32)');ctx.fillStyle=v;ctx.fillRect(0,3*S,w,hh-3*S);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(255,255,255,${.012+.025*L})`;
+  ctx.beginPath();ctx.moveTo(w*.08,SURF*S);ctx.lineTo(w*.15,SURF*S);ctx.lineTo(w*.05,hh);ctx.lineTo(-w*.02,hh);ctx.fill();
+  ctx.beginPath();ctx.moveTo(w*.18,SURF*S);ctx.lineTo(w*.2,SURF*S);ctx.lineTo(w*.1,hh);ctx.lineTo(w*.08,hh);ctx.fill();ctx.restore()}
 function drawNight(){if(L>=1)return;ctx.fillStyle=`rgba(8,16,48,${.55*(1-L)})`;ctx.fillRect(0,3*S,cv.width,cv.height-3*S);
   if(L<.5){ctx.save();ctx.globalCompositeOperation='lighter';const gx=NC*S,gy=(FLOOR-8)*S,g=ctx.createRadialGradient(gx,gy,0,gx,gy,26*S);
     g.addColorStop(0,`rgba(255,190,110,${.16*(1-L)})`);g.addColorStop(1,'rgba(255,190,110,0)');ctx.fillStyle=g;ctx.fillRect(gx-26*S,gy-26*S,52*S,52*S);ctx.restore()}}
@@ -441,29 +446,38 @@ function drawScene(){
   const ag=ctx.createLinearGradient(0,0,0,SURF*S);ag.addColorStop(0,'#2a3138');ag.addColorStop(1,'#1b252d');
   ctx.fillStyle=ag;ctx.fillRect(0,0,cv.width,FLOOR*S);
   px(0,0,W,2,'#2b2f36');px(4,2,W-8,1,L>.5?'#fff6d8':'#9fb8ff');
-  ctx.fillStyle=L>.5?'rgba(255,246,216,.07)':'rgba(150,180,255,.06)';ctx.fillRect(0,3*S,cv.width,4*S);
+  {const lg=ctx.createLinearGradient(0,3*S,0,SURF*S);lg.addColorStop(0,L>.5?'rgba(255,240,200,.22)':'rgba(150,180,255,.16)');lg.addColorStop(1,'rgba(255,240,200,0)');ctx.fillStyle=lg;ctx.fillRect(0,3*S,cv.width,(SURF-3)*S)}
   px(3,4,1,SURF-6,'rgba(255,255,255,.12)');
   // water body with live surface
-  const g=ctx.createLinearGradient(0,SURF*S,0,FLOOR*S);g.addColorStop(0,'#7fd3dc');g.addColorStop(.5,'#3f9fb6');g.addColorStop(1,'#256f8f');
+  const g=ctx.createLinearGradient(0,SURF*S,0,FLOOR*S);g.addColorStop(0,'#8fe2e6');g.addColorStop(.35,'#52b5c8');g.addColorStop(.75,'#2f86a6');g.addColorStop(1,'#256f8f');
   ctx.fillStyle=g;
   const sy=[];
   for(let x=0;x<W;x++){const amb=Math.sin(x*.18+T*.003)*.5+Math.sin(x*.07-T*.002)*.4;sy[x]=Math.round(SURF+wh[x]+amb);ctx.fillRect(x*S,sy[x]*S,S,(FLOOR-sy[x])*S)}
-  for(let x=0;x<W;x++){px(x,sy[x],1,1,'#d6f7f5');const sl=Math.abs((sy[x+1]??sy[x])-sy[x]);if(sl>0)px(x,sy[x]+1,1,1,'#b4ecee')}
+  for(let x=0;x<W;x++){px(x,sy[x],1,1,'#d6f7f5');const sl=Math.abs((sy[x+1]??sy[x])-sy[x]);if(sl>0)px(x,sy[x]+1,1,1,'#b4ecee');
+    const sh=Math.sin(x*.42+T*.004)+Math.sin(x*.17-T*.003);if(sh>1.1)px(x,sy[x]+2,1,1,'rgba(255,255,255,.35)');if(sh>1.5)px(x,sy[x]+3,1,1,'rgba(255,255,255,.18)')}
   // droplets
   drops.forEach(d=>{px(d.x,d.y,1,1,'#d6f7f5');if(d.vy>.08)px(d.x,d.y-1,1,1,'rgba(214,247,245,.5)')});
   drawFar(T);
   // light rays from the lamp
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(let i=0;i<6;i++){const x0=(i*34+12+Math.sin(T*.0004+i)*6)*S;const a=.05+.035*Math.sin(T*.0011+i*1.9);
-    ctx.fillStyle=L>.5?`rgba(255,250,220,${Math.max(0,a)*(.3+.7*L)})`:`rgba(170,200,255,${Math.max(0,a)*.45})`;ctx.beginPath();ctx.moveTo(x0,SURF*S);ctx.lineTo(x0+10*S,SURF*S);ctx.lineTo(x0+22*S,FLOOR*S);ctx.lineTo(x0+6*S,FLOOR*S);ctx.fill()}
+    const ra=L>.5?Math.max(0,a)*(.3+.7*L)*1.6:Math.max(0,a)*.6,rg=ctx.createLinearGradient(0,SURF*S,0,FLOOR*S),rc=L>.5?'255,250,220':'170,200,255';
+    rg.addColorStop(0,`rgba(${rc},${ra})`);rg.addColorStop(1,`rgba(${rc},0)`);ctx.fillStyle=rg;ctx.beginPath();ctx.moveTo(x0,SURF*S);ctx.lineTo(x0+10*S,SURF*S);ctx.lineTo(x0+22*S,FLOOR*S);ctx.lineTo(x0+6*S,FLOOR*S);ctx.fill()}
   ctx.restore();
   // sand
-  px(0,FLOOR,W,H-FLOOR,'#d9c08f');
+  {const sg=ctx.createLinearGradient(0,FLOOR*S,0,H*S);sg.addColorStop(0,'#c9ad7a');sg.addColorStop(.35,'#d9c08f');sg.addColorStop(1,'#e6d2a3');ctx.fillStyle=sg;ctx.fillRect(0,FLOOR*S,cv.width,(H-FLOOR)*S)}
+  px(0,FLOOR,W,1,'#bda06c');
+  for(let x=3;x<W;x+=7){const r=hash(x,41);if(r>.55){const y=FLOOR+2+Math.floor(hash(x,7)*(H-FLOOR-4)),c=['#b8aaa0','#c9b7a8','#e8c2b5','#a9b4b0'][Math.floor(r*40)%4];px(x,y,2,1,c);px(x,y-1,1,1,'rgba(255,255,255,.4)')}}
   for(let x=0;x<W;x+=2)for(let y=FLOOR+1;y<H;y+=2){const h=hash(x,y);if(h>.8)px(x+(h>.9?1:0),y,1,1,'#bfa274');else if(h<.08)px(x,y,1,1,'#efdcb0')}
   // caustics on the sand
   for(let x=0;x<W;x++){const c=Math.sin(x*.31+T*.0021)+Math.sin(x*.13-T*.0017)+Math.sin(x*.07+T*.0009);if(c>1.6)px(x,FLOOR+1+((x*7)%3),1,1,'#fff4cc');if(c>2.1)px(x,FLOOR,1,1,'#fff8de')}
   // rocks
   px(60,FLOOR-4,10,4,'#7d8a92');px(62,FLOOR-6,6,2,'#7d8a92');px(63,FLOOR-6,3,1,'#a3b0b6');px(150,FLOOR-3,7,3,'#6b7780');px(151,FLOOR-4,4,1,'#8f9ba3');
+  // soft shadows on the sand
+  const shadow=(x,w,a)=>{if(a<=0)return;ctx.save();ctx.translate(x*S,(FLOOR+.5)*S);ctx.scale(1,.22);const sg=ctx.createRadialGradient(0,0,0,0,0,w*S);sg.addColorStop(0,`rgba(70,50,30,${a})`);sg.addColorStop(1,'rgba(70,50,30,0)');ctx.fillStyle=sg;ctx.fillRect(-w*S,-w*S,w*2*S,w*2*S);ctx.restore()};
+  {const g0=geo(),ht=-crab.y;shadow(crab.x,(g0.g.bw/2+5)*Math.max(.4,1-ht/45),.38*Math.max(.15,1-ht/40))}
+  fishes.forEach(f=>shadow(f.x,6,.12*Math.max(0,1-(FLOOR-f.y)/60)));
+  st.decos.forEach(d=>shadow(d.x,DECO[d.type].w+2,.25));
   st.shells.forEach(drawShell);
   st.decos.forEach(d=>{if(d.type!=='weed')drawDeco(d)});
   drawNestBack();
@@ -555,7 +569,7 @@ function update(dt){
 
 function loop(now){
   const dt=Math.min(60,now-last);last=now;
-  update(dt);physics(dt);drawScene();box=drawCrab();drawNestFront();drawFront(performance.now());drawNight();drawPinch(dt);
+  update(dt);physics(dt);drawScene();box=drawCrab();drawNestFront();drawFront(performance.now());drawNight();drawLens();drawPinch(dt);
   if(bubT>0){bubT-=dt;if(bubT<=0)bubble.hidden=true}
   const r=cv.getBoundingClientRect(),k=r.width/cv.width;
   bubble.style.left=(crab.x*S*k)+'px';bubble.style.top=((FLOOR+crab.y-24*sc())*S*k)+'px';
