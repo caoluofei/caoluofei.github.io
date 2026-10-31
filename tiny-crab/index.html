@@ -20,23 +20,23 @@
   --accent:#f08a4f; --floor:#2e2620; --wall:#221c18; color-scheme:dark}
 html,body{background:var(--bg);color:var(--ink)}
 body{font-family:var(--f-body);-webkit-font-smoothing:none;font-smooth:never;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px}
-.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
-h1{font-family:var(--f-pixel);font-weight:400;font-size:24px;margin:0}
-.sub{color:var(--muted);font-size:12px;margin:0}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{font-family:var(--f-pixel);font-weight:400;font-size:36px;margin:0}
+.sub{color:var(--muted);font-size:24px;line-height:1.5;margin:0}
 .win{background:var(--panel);border:2px solid var(--line);border-radius:10px;overflow:hidden}
-.bar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:2px solid var(--line);font-family:var(--f-pixel);font-size:12px;color:var(--muted)}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.bar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:2px solid var(--line);font-family:var(--f-pixel);font-size:24px;color:var(--muted)}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--line)}
 .dot:first-child{background:var(--accent)}
 .stage{position:relative;touch-action:none;user-select:none;-webkit-user-select:none}
 canvas{display:block;width:100%;height:auto;image-rendering:pixelated;cursor:pointer}
-.bubble{position:absolute;transform:translate(-50%,-100%);background:var(--panel);color:var(--ink);border:2px solid var(--ink);border-radius:8px;padding:5px 9px;font-family:var(--f-pixel);font-size:12px;white-space:nowrap;pointer-events:none;transition:opacity .2s}
+.bubble{position:absolute;transform:translate(-50%,-100%);background:var(--panel);color:var(--ink);border:2px solid var(--ink);border-radius:8px;padding:8px 14px;font-family:var(--f-pixel);font-size:24px;white-space:nowrap;pointer-events:none;transition:opacity .2s}
 .bubble::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--ink)}
-.stats{display:flex;gap:16px;flex-wrap:wrap;padding:10px 12px;border-top:2px solid var(--line);font-family:var(--f-pixel);font-size:12px}
+.stats{display:flex;gap:16px;flex-wrap:wrap;padding:10px 12px;border-top:2px solid var(--line);font-family:var(--f-pixel);font-size:24px}
 .stat{display:flex;align-items:center;gap:8px;flex:1;min-width:140px}
-.meter{flex:1;height:10px;background:var(--floor);border-radius:2px;overflow:hidden}
+.meter{flex:1;height:16px;background:var(--floor);border-radius:2px;overflow:hidden}
 .meter i{display:block;height:100%;background:var(--accent);transition:width .4s}
 .btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-button{font-family:var(--f-pixel);font-size:12px;padding:12px 6px;border-radius:8px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+button{font-family:var(--f-pixel);font-size:24px;padding:16px 8px;border-radius:8px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:0 3px 0 var(--ink)}
 button:active{transform:translateY(3px);box-shadow:none}
 button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .flash{position:absolute;inset:0;background:rgba(255,70,50,.38);opacity:0;pointer-events:none;transition:opacity .45s ease-out}
@@ -46,20 +46,21 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.win.shake{animation:none}}
 .head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .langwrap{display:flex;align-items:center;gap:10px}
-.langlabel{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-pixel);font-size:12px;color:var(--muted)}
+.langlabel{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-pixel);font-size:24px;color:var(--muted)}
 .langlabel svg{display:block}
 .lang{display:flex;border:2px solid var(--ink);border-radius:8px;overflow:hidden}
-.lang button{box-shadow:none;border:0;border-radius:0;padding:6px 10px;min-width:40px;background:var(--panel)}
+.lang button{box-shadow:none;border:0;border-radius:0;padding:8px 14px;min-width:56px;background:var(--panel)}
 .lang button+button{border-left:2px solid var(--ink)}
 .lang button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .lang button:active{transform:none}
-.tip{color:var(--muted);font-size:12px;margin:0;line-height:1.7}
+@media (max-width:640px){h1{font-size:24px!important}.sub,.tip,.bar,.stats,.bubble,button,.langlabel{font-size:12px!important}.langlabel svg{width:12px;height:12px}button{padding:12px 6px}}
+.tip{color:var(--muted);font-size:24px;margin:0;line-height:1.7}
 </style>
 
 <div class="wrap">
   <div class="head">
     <h1 data-i18n="title">小螃蟹桌宠</h1>
-    <div class="langwrap"><span class="langlabel" id="langLabel"><svg width="12" height="12" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true" fill="currentColor"><rect x="4" y="0" width="4" height="1"/><rect x="2" y="1" width="2" height="1"/><rect x="8" y="1" width="2" height="1"/><rect x="1" y="2" width="1" height="2"/><rect x="10" y="2" width="1" height="2"/><rect x="0" y="4" width="1" height="4"/><rect x="11" y="4" width="1" height="4"/><rect x="1" y="8" width="1" height="2"/><rect x="10" y="8" width="1" height="2"/><rect x="2" y="10" width="2" height="1"/><rect x="8" y="10" width="2" height="1"/><rect x="4" y="11" width="4" height="1"/><rect x="5" y="1" width="2" height="10"/><rect x="3" y="2" width="1" height="8"/><rect x="8" y="2" width="1" height="8"/><rect x="1" y="5" width="10" height="2"/></svg>Language</span>
+    <div class="langwrap"><span class="langlabel" id="langLabel"><svg width="24" height="24" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true" fill="currentColor"><rect x="4" y="0" width="4" height="1"/><rect x="2" y="1" width="2" height="1"/><rect x="8" y="1" width="2" height="1"/><rect x="1" y="2" width="1" height="2"/><rect x="10" y="2" width="1" height="2"/><rect x="0" y="4" width="1" height="4"/><rect x="11" y="4" width="1" height="4"/><rect x="1" y="8" width="1" height="2"/><rect x="10" y="8" width="1" height="2"/><rect x="2" y="10" width="2" height="1"/><rect x="8" y="10" width="2" height="1"/><rect x="4" y="11" width="4" height="1"/><rect x="5" y="1" width="2" height="10"/><rect x="3" y="2" width="1" height="8"/><rect x="8" y="2" width="1" height="8"/><rect x="1" y="5" width="10" height="2"/></svg>Language</span>
     <div class="lang" role="group" aria-labelledby="langLabel"><button data-lang="zh" aria-pressed="true">中</button><button data-lang="ja" aria-pressed="false">日</button><button data-lang="en" aria-pressed="false">EN</button></div></div>
   </div>
   <div>
@@ -68,7 +69,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
   <div class="win">
     <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:6px">aquarium.exe</span></div>
     <div class="stage" id="stage">
-      <canvas id="cv" width="720" height="300" aria-label="小螃蟹在桌面上走来走去"></canvas>
+      <canvas id="cv" width="1080" height="450" aria-label="小螃蟹在桌面上走来走去"></canvas>
       <div class="bubble" id="bubble" hidden></div>
       <div class="flash" id="flash"></div>
     </div>
@@ -90,7 +91,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 <script>
 (()=>{
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
-const S=4, W=cv.width/S, H=cv.height/S, FLOOR=H-12;
+const S=6, W=cv.width/S, H=cv.height/S, FLOOR=H-12;
 const bubble=document.getElementById('bubble'),stage=document.getElementById('stage');
 const C={shell:'#e8743b',dark:'#b4502a',light:'#f7a86f',eye:'#2a1d18',blush:'#ff9b8a',white:'#fff7ee'};
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -206,7 +207,7 @@ function drawCrab(){
   if(air) px(bx-1,y0-7,2,2,C.eye); else if(mode==='eat'&&Math.floor(t/120)%2) px(bx-1,y0-7+lift,2,2,C.eye); else px(bx-1,y0-7+lift,2,1,C.eye);
   // zz
   if(mode==='sleep'){
-    ctx.fillStyle=css('--muted');ctx.font=`12px ${css('--f-pixel')}`;
+    ctx.fillStyle=css('--muted');ctx.font=`18px ${css('--f-pixel')}`;
     const k=(t/700)%3;
     ctx.fillText('z',(bx+8)*S,(y0-16-k*2)*S); if(k>1)ctx.fillText('Z',(bx+11)*S,(y0-21)*S);
   }
@@ -373,7 +374,7 @@ function drawPinch(dt){if(!pinch)return;pinch.t+=dt;const t=pinch.t;if(t>900){pi
   P(-7,1+gap,9,3,C.dark);P(-6,1+gap,7,2,C.shell);P(2,1+gap,2,1,C.dark);
   P(-10,-3-gap/2,4,6+gap,C.dark);P(-9,-2-gap/2,3,4+gap,C.shell);
   if(t>80&&t<500){ctx.fillStyle='#fff3c4';[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx,sy])=>{for(let i=0;i<3;i++)px(cx+sx*(10+i*2),cy+sy*(5+i),2,1,'#fff3c4')});
-    ctx.font=`24px ${css('--f-pixel')}`;ctx.fillStyle='#fff3c4';ctx.fillText(T('snapTxt'),(cx+8)*S,(cy-8)*S)}
+    ctx.font=`36px ${css('--f-pixel')}`;ctx.fillStyle='#fff3c4';ctx.fillText(T('snapTxt'),(cx+8)*S,(cy-8)*S)}
   ctx.globalAlpha=1}
 function wake(){if(crab.mode==='sleep'){setMode('idle');say(pick(lines.wake));sfx.chirp();return true}return false}
 function pet(){crab.blush=1500;sfx.purr();setMode('happy',1600);st.mood=Math.min(100,st.mood+8);
