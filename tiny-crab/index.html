@@ -433,7 +433,7 @@ function drawFar(now){if(!farL)buildLayers();const o=Math.round(Math.sin(now*.00
     if(s.z<.75){ctx.globalAlpha=.2+s.z*.35;px(s.x,s.y,1,1,'#eafcff');ctx.globalAlpha=1}})}
 function drawFront(now){if(!nearL)buildLayers();
   snow.forEach(s=>{if(s.z<.75)return;const r=(2+(s.z-.75)*14)*S,x=s.x*S,y=s.y*S,g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(234,252,255,.28)');g.addColorStop(1,'rgba(234,252,255,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2)});
-  ctx.save();ctx.globalAlpha=.92;ctx.drawImage(nearL,Math.round(Math.sin(now*.0007)*S*.8),0);ctx.restore()}
+}
 function drawScene(){
   const T=performance.now();
   // air gap + lamp
