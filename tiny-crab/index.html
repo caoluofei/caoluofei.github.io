@@ -410,6 +410,30 @@ function daylight(){if(location.hash==='#night')return 0;if(location.hash==='#da
   if(h>=7&&h<18.5)return 1;if(h>=6&&h<7)return h-6;if(h>=18.5&&h<19.5)return 1-(h-18.5);return 0}
 let L=daylight(),prevNight=L<.3;setInterval(()=>{L=daylight()},5000);addEventListener('hashchange',()=>{L=daylight()});
 const hash=(a,b)=>{const s=Math.sin(a*127.1+b*311.7)*43758.5;return s-Math.floor(s)};
+// ---- depth of field: a hazy far layer, a blurred near layer, drifting particles at mixed depths ----
+function makeLayer(draw,blur){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const keep=ctx;ctx=c.getContext('2d');draw();ctx=keep;
+  if(!blur)return c;const b=document.createElement('canvas');b.width=c.width;b.height=c.height;const g=b.getContext('2d');g.filter=`blur(${blur}px)`;g.drawImage(c,0,0);return b}
+let farL=null,nearL=null;
+function buildLayers(){
+  farL=makeLayer(()=>{
+    for(let x=-6;x<W+6;x++){const hh=Math.round(5+2*Math.sin(x*.05)+1.5*Math.sin(x*.13+1));px(x,FLOOR-hh,1,hh+1,'#78a091');px(x,FLOOR-hh,1,1,'#9cbcad')}
+    [[30,18,9],[96,26,13],[152,16,8],[176,20,10]].forEach(([x,w,hh])=>{for(let r=0;r<hh;r++){const ww=Math.round(w*Math.sqrt(1-(r/hh)**2));px(x-ww/2,FLOOR-5-r,ww,1,'#2f6f86')}});
+    [[22,34],[50,26],[68,42],[80,28],[110,38],[126,24],[138,30],[168,40]].forEach(([x,hh],k)=>{for(let i=0;i<hh;i++){const xx=Math.round(x+Math.sin(i*.25+k)*2);px(xx,FLOOR-5-i,2,1,'#266f78');if(i%4===2)px(xx+(i%8===2?2:-2),FLOOR-5-i,2,1,'#266f78')}});
+    [[58,'#7a6f9e'],[124,'#9a6f8e']].forEach(([cx,c])=>{px(cx,FLOOR-16,2,11,c);px(cx-4,FLOOR-22,2,10,c);px(cx-3,FLOOR-13,3,1,c);px(cx+4,FLOOR-24,2,13,c);px(cx+2,FLOOR-12,2,1,c);px(cx+7,FLOOR-18,2,6,c)});
+  },5);
+  nearL=makeLayer(()=>{
+    [[1,0],[6,1.7],[11,3.1]].forEach(([b,ph])=>{for(let i=0;i<28;i++){const xx=Math.round(b+Math.sin(i*.22+ph)*2.2);px(xx,H-i*2,3,2,'#2b6644');if(i%5===2)px(xx+(i%10===2?3:-2),H-i*2,2,2,'#2b6644')}});
+    const rx=W-14;[[26,0],[26,1],[25,2],[24,3],[22,4],[19,5],[15,6],[10,7]].forEach(([w,r])=>px(rx-w/2,H-1-r,w,1,'#4a575e'));px(rx-6,H-7,5,1,'#64737a');
+    px(W-34,H-3,7,3,'#5b676d');px(W-33,H-4,5,1,'#5b676d');
+  },16);
+}
+const snow=Array.from({length:34},()=>({x:Math.random()*W,y:SURF+Math.random()*(FLOOR-SURF),z:Math.random(),p:Math.random()*6}));
+function drawFar(now){if(!farL)buildLayers();const o=Math.round(Math.sin(now*.0003)*S);ctx.globalAlpha=.9;ctx.drawImage(farL,o,0);ctx.globalAlpha=1;
+  snow.forEach(s=>{s.y+=.02+s.z*.03;s.x+=Math.sin(now*.001+s.p)*.02;if(s.y>FLOOR){s.y=SURF+1;s.x=Math.random()*W}
+    if(s.z<.75){ctx.globalAlpha=.2+s.z*.35;px(s.x,s.y,1,1,'#eafcff');ctx.globalAlpha=1}})}
+function drawFront(now){if(!nearL)buildLayers();
+  snow.forEach(s=>{if(s.z<.75)return;const r=(2+(s.z-.75)*14)*S,x=s.x*S,y=s.y*S,g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(234,252,255,.28)');g.addColorStop(1,'rgba(234,252,255,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2)});
+  ctx.save();ctx.globalAlpha=.92;ctx.drawImage(nearL,Math.round(Math.sin(now*.0007)*S*.8),0);ctx.restore()}
 function drawScene(){
   const T=performance.now();
   // air gap + lamp
@@ -427,6 +451,7 @@ function drawScene(){
   for(let x=0;x<W;x++){px(x,sy[x],1,1,'#d6f7f5');const sl=Math.abs((sy[x+1]??sy[x])-sy[x]);if(sl>0)px(x,sy[x]+1,1,1,'#b4ecee')}
   // droplets
   drops.forEach(d=>{px(d.x,d.y,1,1,'#d6f7f5');if(d.vy>.08)px(d.x,d.y-1,1,1,'rgba(214,247,245,.5)')});
+  drawFar(T);
   // light rays from the lamp
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(let i=0;i<6;i++){const x0=(i*34+12+Math.sin(T*.0004+i)*6)*S;const a=.05+.035*Math.sin(T*.0011+i*1.9);
@@ -530,7 +555,7 @@ function update(dt){
 
 function loop(now){
   const dt=Math.min(60,now-last);last=now;
-  update(dt);physics(dt);drawScene();box=drawCrab();drawNestFront();drawNight();drawPinch(dt);
+  update(dt);physics(dt);drawScene();box=drawCrab();drawNestFront();drawFront(performance.now());drawNight();drawPinch(dt);
   if(bubT>0){bubT-=dt;if(bubT<=0)bubble.hidden=true}
   const r=cv.getBoundingClientRect(),k=r.width/cv.width;
   bubble.style.left=(crab.x*S*k)+'px';bubble.style.top=((FLOOR+crab.y-24*sc())*S*k)+'px';
