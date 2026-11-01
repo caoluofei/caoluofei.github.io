@@ -1,0 +1,5 @@
+Tiny Crab
+Made by CAO LUOFEI.
+
+Pixel font: a renamed subset of Fusion Pixel by TakWolf (https://github.com/TakWolf/fusion-pixel-font),
+used under the SIL Open Font License 1.1. See FONT-LICENSE.txt.
