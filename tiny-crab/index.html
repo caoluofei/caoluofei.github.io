@@ -536,10 +536,10 @@ function updateFish(dt){const hy=FLOOR+crab.y-14*sc(),awake=crab.mode!=='sleep';
     if(!giving&&fF(f)<3&&awake&&crab.mode==='idle'&&crab.startleCD<=0&&near<7&&f.flee<=0){crab.startleCD=25000;setMode('wave',800);say(pick(T('startle')),1600);sfx.yelp();f.flee=900;f.tx=Math.max(8,Math.min(W-8,f.x+Math.sign(f.x-crab.x||1)*40))}})}
 function focusing(){return st.pomo&&st.pomo.phase==='focus'}
 // hunger and mood drop with real time, also while the window is hidden or closed
-// awake: one food cell every 5 min, one mood cell every 8 min; asleep, at night or while closed: a quarter of that
+// awake: one food cell every 2 min, one mood cell every 3 min; asleep, at night or while closed: a quarter of that
 function decay(){const now=Date.now(),el=Math.max(0,now-(st.seen||now));st.seen=now;if(!el||st.ghost)return;
   const away=el>5000,rest=away||crab.mode==='sleep'||L<.3?.25:1;
-  st.food=Math.max(0,st.food-el/30000*rest);st.mood=Math.max(0,st.mood-el/48000*rest*(st.food<=0?2:1))}
+  st.food=Math.max(0,st.food-el/12000*rest);st.mood=Math.max(0,st.mood-el/18000*rest)}
 let ghost=null,gdrag=false;
 function initGhost(){crab.mode='dead';crab.modeT=0;crab.y=0;ghost={x:crab.x,y:FLOOR-8,t:0,tx:crab.x,ty:FLOOR-30}}
 function becomeGhost(){if(crab.carry){st.items.push(crab.carry);crab.carry=null}if(crab.gift){st.items.push(crab.gift.item);crab.gift=null}
@@ -578,7 +578,7 @@ function update(dt){
   sand.forEach(s=>{s.vy+=.0004*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt});sand=sand.filter(s=>s.life>0&&s.y<=FLOOR+1);
   if(!treasure&&st.items.length<12){treasureT-=dt;if(treasureT<=0){treasureT=60000+Math.random()*60000;
     let x;do{x=12+Math.random()*(W-24)}while(Math.abs(x-NC)<20);treasure={x,type:['shell','pearl','key','coin','glass'][Math.floor(Math.random()*5)]}}}
-  if(!st.ghost&&st.food<=0&&st.mood<=0&&!['lift','fall','molt'].includes(crab.mode))becomeGhost();
+  if(!st.ghost&&st.food<=0&&!['lift','fall','molt'].includes(crab.mode))becomeGhost();
   if(st.ghost){updateGhost(dt);return}
   if(crab.gift&&(crab.gift.t-=dt)<=0){st.items.push(crab.gift.item);crab.gift=null}
   crab.chaseT=(crab.chaseT||0)-dt;crab.startleCD=(crab.startleCD||0)-dt;
