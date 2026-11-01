@@ -532,9 +532,14 @@ function updateFish(dt){const hy=FLOOR+crab.y-14*sc(),awake=crab.mode!=='sleep';
     else{f.x+=dx/dist*sp*dt;f.y+=dy/dist*sp*dt*.7;if(Math.abs(dx)>.3)f.dir=Math.sign(dx)}
     if(!giving&&fF(f)<3&&awake&&crab.mode==='idle'&&crab.startleCD<=0&&near<7&&f.flee<=0){crab.startleCD=25000;setMode('wave',800);say(pick(T('startle')),1600);sfx.yelp();f.flee=900;f.tx=Math.max(8,Math.min(W-8,f.x+Math.sign(f.x-crab.x||1)*40))}})}
 function focusing(){return st.pomo&&st.pomo.phase==='focus'}
+// hunger and mood drop with real time, also while the window is hidden or closed
+// awake: one food cell every 5 min, one mood cell every 8 min; asleep, at night or while closed: a quarter of that
+function decay(){const now=Date.now(),el=Math.max(0,now-(st.seen||now));st.seen=now;if(!el)return;
+  const away=el>5000,rest=away||crab.mode==='sleep'||L<.3?.25:1;
+  st.food=Math.max(0,st.food-el/30000*rest);st.mood=Math.max(0,st.mood-el/48000*rest*(st.food<=0?2:1))}
 function update(dt){
   crab.t+=dt;crab.modeT-=dt;crab.angerT-=dt;crab.squeeze=Math.max(0,(crab.squeeze||0)-dt);crab.blush=Math.max(0,crab.blush-dt);
-  st.food=Math.max(0,st.food-dt/9000);st.mood=Math.max(0,st.mood-dt/12000);
+  decay();
   // food falling
   foods.forEach(f=>{if(f.y<FLOOR-1){const was=f.y;f.y=Math.min(FLOOR-1,f.y+dt/(f.y>SURF?60:18));if(was<SURF&&f.y>=SURF){sfx.plop();poke(f.x,3,1.2);splash(f.x,3,.5)}}});
   sparks.forEach(s=>{s.y-=dt/80;s.life-=dt});sparks=sparks.filter(s=>s.life>0);
