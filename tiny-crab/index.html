@@ -2394,7 +2394,7 @@ function seasonPhysics(dt) {
       if (a.k !== "winter") floaters.push({ x: a.x, k: a.k, vx: 0, p: a.p });
     }
   });
-  airfall = airfall.filter(a => !a.dead && a.x > 0 && a.x < W);
+  airfall = airfall.filter(a => !a.dead && a.k === s && a.x > 0 && a.x < W);
 
   // floaters ride the waves and get pushed by the slope; the oldest sink when there are too many
   floaters.forEach(f => {
@@ -2561,6 +2561,71 @@ function drawFront(now) {
     ctx.fillRect(x - r, y - r, r * 2, r * 2);
   });
 }
+// ---- light rays: each one fades in, sways, fades out and comes back somewhere else ----
+// depth 0 = far (thin, faint, short), 1 = near (wide, brighter, reaches the sand)
+const rays = [];
+let rayClock = performance.now();
+function newRay(r, now, first) {
+  r.depth = Math.random();
+  r.x = -20 + Math.random() * (W + 30);
+  r.w = 3 + r.depth * 10;
+  r.tilt = 0.14 + Math.random() * 0.08;
+  r.dur = 7000 + Math.random() * 9000;
+  r.born = now - (first ? Math.random() * r.dur : 0);
+  r.peak = 0.05 + r.depth * 0.1;
+  r.p = Math.random() * 6;
+  return r;
+}
+function drawRays(T) {
+  const dt = Math.min(100, T - rayClock);
+  rayClock = T;
+  while (rays.length < 8) rays.push(newRay({}, T, true));
+  rays.sort((a, b) => a.depth - b.depth);
+  const col = L > 0.5 ? "255,248,215" : "170,200,255",
+    bright = L > 0.5 ? 0.35 + 0.65 * L : 0.4,
+    top = SURF - 9;
+  ctx.save();
+  ctx.clip(waterPath);
+  ctx.globalCompositeOperation = "lighter";
+  rays.forEach(r => {
+    let k = (T - r.born) / r.dur;
+    if (k >= 1) {
+      newRay(r, T, false);
+      k = 0;
+    }
+    const env = k < 0.25 ? k / 0.25 : k > 0.7 ? (1 - k) / 0.3 : 1,
+      ease = env * env * (3 - 2 * env),
+      flick = 0.85 + 0.15 * Math.sin(T * 0.0013 + r.p),
+      a = r.peak * ease * flick * bright;
+    if (a < 0.002) return;
+    r.x += Math.sin(T * 0.0002 + r.p) * 0.004 * dt;
+    const len = (FLOOR - SURF) * (0.5 + r.depth * 0.5),
+      bottom = top + len,
+      x0 = r.x * S;
+    // three nested quads give a soft edge and a brighter core
+    [
+      [1, 0.4],
+      [0.62, 0.35],
+      [0.3, 0.4],
+    ].forEach(([ws, as]) => {
+      const wt = r.w * ws * S,
+        wb = wt * 1.7,
+        cx = x0 + (len * r.tilt * S) / 2,
+        g = ctx.createLinearGradient(0, top * S, 0, bottom * S);
+      g.addColorStop(0, `rgba(${col},${a * as})`);
+      g.addColorStop(0.15, `rgba(${col},${a * as})`);
+      g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(x0 - wt / 2, top * S);
+      ctx.lineTo(x0 + wt / 2, top * S);
+      ctx.lineTo(x0 + len * r.tilt * S + wb / 2, bottom * S);
+      ctx.lineTo(x0 + len * r.tilt * S - wb / 2, bottom * S);
+      ctx.fill();
+    });
+  });
+  ctx.restore();
+}
 function drawScene() {
   const T = performance.now();
   // air gap + lamp
@@ -2615,27 +2680,7 @@ function drawScene() {
     if (d.vy > 0.08) px(d.x, d.y - 1, 1, 1, "rgba(214,247,245,.5)");
   });
   drawFar(T);
-  // light rays from the lamp, only inside the water
-  ctx.save();
-  ctx.clip(waterPath);
-  ctx.globalCompositeOperation = "lighter";
-  for (let i = 0; i < 6; i++) {
-    const x0 = (i * 34 + 12 + Math.sin(T * 0.0004 + i) * 6) * S;
-    const a = 0.05 + 0.035 * Math.sin(T * 0.0011 + i * 1.9);
-    const ra = L > 0.5 ? Math.max(0, a) * (0.3 + 0.7 * L) * 1.6 : Math.max(0, a) * 0.6,
-      rg = ctx.createLinearGradient(0, SURF * S, 0, FLOOR * S),
-      rc = L > 0.5 ? "255,250,220" : "170,200,255";
-    rg.addColorStop(0, `rgba(${rc},${ra})`);
-    rg.addColorStop(1, `rgba(${rc},0)`);
-    ctx.fillStyle = rg;
-    ctx.beginPath();
-    ctx.moveTo(x0, SURF * S);
-    ctx.lineTo(x0 + 10 * S, SURF * S);
-    ctx.lineTo(x0 + 22 * S, FLOOR * S);
-    ctx.lineTo(x0 + 6 * S, FLOOR * S);
-    ctx.fill();
-  }
-  ctx.restore();
+  drawRays(T);
   drawSeasonSurface(T);
   // sand
   {
