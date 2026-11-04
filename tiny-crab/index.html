@@ -641,7 +641,7 @@ const ALV=[["cccccccccccccccc","ssssssssssssssss","ffffffffffffffff","cccccccccc
 const ABW=10,ABH=4,ABX=10,ABY=16;
 let arc={state:'menu',px:W/2};
 function openArcade(){if(crab.mode==='sleep'){say(T('arcSleep'),1500);return}if(decoMode)setDeco(false);view='arcade';fadeT=350;arc={state:'menu',px:W/2,note:'',noteT:0};crab.y=0;crab.mode='idle';syncGo();sfx.chime()}
-function closeArcade(){view='home';fadeT=350;const a=D().find(d=>d.type==='arcade');crab.x=a?Math.max(34,Math.min(W-16,a.x-14)):W/2;crab.tx=crab.x;crab.mode='idle';crab.y=0;syncGo();lastTouch=performance.now();save()}
+function closeArcade(){if((arc.state==='play'||arc.state==='ready')&&arc.broken>0){st.mood=Math.min(100,st.mood+Math.min(35,6+Math.floor(arc.broken/3)));addXP(8+Math.floor(arc.broken/6))}view='home';fadeT=350;const a=D().find(d=>d.type==='arcade');crab.x=a?Math.max(34,Math.min(W-16,a.x-14)):W/2;crab.tx=crab.x;crab.mode='idle';crab.y=0;syncGo();lastTouch=performance.now();save()}
 function arcLoad(){arc.bricks=[];ALV[arc.level].forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch!=='.')arc.bricks.push({x:ABX+i*ABW,y:ABY+j*(ABH+1),t:ch,hp:ch==='r'?2:1})}));arc.balls=[{stuck:true,x:arc.px,y:0,vx:0,vy:0}];arc.drops=[];arc.state='ready'}
 const arcSp=()=>.06+arc.level*.006;
 function paddle(){const {g,top}=geo();return{hw:Math.floor(g.bw/2)+4+Math.floor(g.cs/2),y:FLOOR+top-2}}
@@ -651,7 +651,7 @@ function arcDown(p){if(arc.state==='menu'){const MY=Math.round(H*.3);if(p&&(p.y<
     st.food-=15;Object.assign(arc,{level:0,score:0,earned:0,lives:3,broken:0,fx:[]});arcLoad();sfx.chirp();return}
   if(arc.state==='ready'){const b=arc.balls[0];b.stuck=false;const a=(-90+(Math.random()*40-20))*Math.PI/180;b.vx=Math.cos(a)*arcSp();b.vy=Math.sin(a)*arcSp();arc.state='play';sfx.launch();return}
   if(arc.state==='end'){arc.state='menu';return}}
-function arcFinish(win){arc.state='end';arc.win=win;const gain=Math.min(35,6+Math.floor(arc.broken/3));st.mood=Math.min(100,st.mood+gain);addXP(8+Math.floor(arc.broken/6));st.coins+=arc.earned;syncShop();
+function arcFinish(win){arc.state='end';arc.win=win;const gain=Math.min(35,6+Math.floor(arc.broken/3));st.mood=Math.min(100,st.mood+gain);addXP(8+Math.floor(arc.broken/6));syncShop();
   if(win)sfx.clear();else sfx.lose();save()}
 function arcUpdate(dt){if(arc.noteT>0)arc.noteT-=dt;
   if(arc.kl)arc.px-=dt*.12;if(arc.kr)arc.px+=dt*.12;const P=paddle();arc.px=Math.max(P.hw+1,Math.min(W-P.hw-1,arc.px));crab.x=arc.px;crab.tx=crab.x;crab.y=0;
@@ -659,7 +659,7 @@ function arcUpdate(dt){if(arc.noteT>0)arc.noteT-=dt;
   if(arc.fx)arc.fx.forEach(f=>{f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=.0002*dt;f.life-=dt}),arc.fx=arc.fx.filter(f=>f.life>0);
   if(arc.state!=='play'&&arc.state!=='ready')return;
   arc.balls.forEach(b=>{if(b.stuck){b.x=arc.px;b.y=P.y-2}});if(arc.state!=='play')return;
-  arc.drops.forEach(d=>{d.y+=dt*.035;if(d.y>=P.y-1&&d.y<=P.y+3&&Math.abs(d.x-arc.px)<=P.hw){d.dead=1;if(d.k==='coin'){arc.earned++;sfx.sparkle()}else{sfx.power();const b=arc.balls[0];if(b)for(const a of[-30,30]){const r=(-90+a)*Math.PI/180;arc.balls.push({x:b.x,y:b.y,vx:Math.cos(r)*arcSp(),vy:Math.sin(r)*arcSp()})}}}});
+  arc.drops.forEach(d=>{d.y+=dt*.035;if(d.y>=P.y-1&&d.y<=P.y+3&&Math.abs(d.x-arc.px)<=P.hw){d.dead=1;if(d.k==='coin'){arc.earned++;st.coins++;syncShop();sfx.sparkle()}else{sfx.power();const b=arc.balls[0];if(b)for(const a of[-30,30]){const r=(-90+a)*Math.PI/180;arc.balls.push({x:b.x,y:b.y,vx:Math.cos(r)*arcSp(),vy:Math.sin(r)*arcSp()})}}}});
   arc.drops=arc.drops.filter(d=>!d.dead&&d.y<FLOOR+2);
   const steps=Math.ceil(dt/4);
   for(let s=0;s<steps;s++){const hh=dt/steps;
@@ -675,7 +675,7 @@ function arcUpdate(dt){if(arc.noteT>0)arc.noteT-=dt;
     arc.balls=arc.balls.filter(b=>!b.dead);
     arc.balls.forEach(b=>{const sp=Math.hypot(b.vx,b.vy),w=arcSp();b.vx*=w/sp;b.vy*=w/sp;if(Math.abs(b.vy)<w*.3){b.vy=Math.sign(b.vy||-1)*w*.3;b.vx=Math.sign(b.vx||1)*Math.sqrt(w*w-b.vy*b.vy)}})}
   if(!arc.balls.length){arc.lives--;if(arc.lives<=0)arcFinish(false);else{arc.balls=[{stuck:true,x:arc.px,y:0,vx:0,vy:0}];arc.drops=[];arc.state='ready';arc.note=T('arcLost');arc.noteT=1200;sfx.lose()}}
-  if(!arc.bricks.length){arc.level++;arc.earned+=5;if(arc.level>=ALV.length)arcFinish(true);else{sfx.clear();arcLoad()}}}
+  if(!arc.bricks.length){arc.level++;arc.earned+=5;st.coins+=5;syncShop();if(arc.level>=ALV.length)arcFinish(true);else{sfx.clear();arcLoad()}}}
 function arcText(t,x,y,size,col,align='center'){ctx.font=`${size}px ${css('--f-pixel')}`;ctx.textAlign=align;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillText(t,x*S+3,y*S+3);ctx.fillStyle=col;ctx.fillText(t,x*S,y*S);ctx.textAlign='left'}
 function drawArcade(now){ctx.fillStyle='#1b1530';ctx.fillRect(0,0,cv.width,cv.height);
   for(let i=0;i<40;i++){const x=hash(i,21)*W,y=hash(i,22)*(FLOOR-4);if((Math.floor(now/500)+i)%5)px(x,y,1,1,i%3?'#3a3263':'#6b5fa8')}
