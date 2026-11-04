@@ -600,7 +600,7 @@ function enterHome(){if(st.ghost){say(T('ghostHint'),2200);return}if(decoMode)se
 function exitHome(){if(decoMode)setDeco(false);view='out';fadeT=350;foods=[];crab.x=NC+6;crab.tx=NC+20;crab.y=0;crab.home=false;if(crab.mode==='sleep')crab.mode='idle';
   document.getElementById('bGo').hidden=true;sfx.place();lastTouch=performance.now()}
 function homeUpdate(dt){if(st.food<=0){exitHome();return}st.mood=Math.min(100,st.mood+dt/20000);
-  const m=crab.mode;if(m==='sleep')return;if(crab.y<0&&m!=='lift')crab.y=0;
+  const m=crab.mode;if(m==='sleep'){if(crab.onBed){if(D().includes(crab.onBed))crab.x=crab.onBed.x-3;else{crab.onBed=null;crab.y=0}}return}crab.onBed=null;if(crab.y<0&&m!=='lift')crab.y=0;
   if((m==='wave'||m==='happy'||m==='eat')&&crab.modeT<=0)setMode('idle');
   if(crab.mode!=='idle'&&crab.mode!=='walk')return;
   const landed=foods.find(f=>f.y>=FLOOR-1),bed=D().find(d=>d.type==='bed');
@@ -609,7 +609,7 @@ function homeUpdate(dt){if(st.food<=0){exitHome();return}st.mood=Math.min(100,st
   if(Math.abs(d)>.6){crab.dir=Math.sign(d);crab.x+=crab.dir*dt/55;crab.mode='walk';const lp=Math.floor(crab.t/110)%2;if(lp!==crab.lp){crab.lp=lp;sfx.step()}}
   else{crab.mode='idle';
     if(landed&&Math.abs(landed.x-crab.x)<3){foods.splice(foods.indexOf(landed),1);st.food=Math.min(100,st.food+(landed.gold?40:25));st.mood=Math.min(100,st.mood+5);addXP(12);setMode('eat',1400);say(pick(lines.eat));sfx.munch()}
-    else if(crab.home){crab.home=false;if(bed&&Math.abs(crab.x-(bed.x-3))<2)crab.y=-3;setMode('sleep');bubble.hidden=true}
+    else if(crab.home){crab.home=false;if(bed&&Math.abs(crab.x-(bed.x-3))<2){crab.y=-3;crab.onBed=bed}setMode('sleep');bubble.hidden=true}
     else if(!foods.length&&Math.random()<dt/5000)crab.tx=Math.max(34,Math.min(W-16,crab.x+(Math.random()*60-30)))}
   if(performance.now()-lastTouch>(L<.3?12000:40000)&&!foods.length&&crab.mode!=='sleep'&&!crab.home)crab.home=true}
 function drawHome(T){ctx.fillStyle='#2e1f1c';ctx.fillRect(0,0,cv.width,cv.height);
@@ -629,7 +629,7 @@ function drawHome(T){ctx.fillStyle='#2e1f1c';ctx.fillRect(0,0,cv.width,cv.height
   list.forEach(d=>{if(!DECO[d.type].lift&&d.type!=='rug')sh(d.x,DECO[d.type].w+2,.3)});sh(crab.x,geo().g.bw/2+5,.35);
   list.forEach(drawDeco);
   if(decoMode)list.forEach(d=>{const s=DECO[d.type],on=selected.has(d),b=FLOOR-(s.lift||0);ctx.lineWidth=on?3:1;ctx.strokeStyle=on?'#ffb347':'rgba(255,255,255,.6)';ctx.setLineDash(on?[]:[S,S]);ctx.strokeRect((d.x-s.w)*S,(b-s.h)*S,s.w*2*S,s.h*S);ctx.setLineDash([]);ctx.lineWidth=1})}
-function drawBlanket(){if(crab.mode!=='sleep'||crab.y>=0)return;const bed=D().find(d=>d.type==='bed');if(!bed)return;const x=Math.round(bed.x);px(x-11,FLOOR-7,15,3,'#ffb3c1');px(x-11,FLOOR-7,15,1,'#ffd0da');for(let i=-10;i<4;i+=3)px(x+i,FLOOR-6,1,1,'#ff9fb2')}
+function drawBlanket(){if(crab.mode!=='sleep'||crab.y>=0)return;const bed=crab.onBed;if(!bed)return;const x=Math.round(bed.x);px(x-11,FLOOR-7,15,3,'#ffb3c1');px(x-11,FLOOR-7,15,1,'#ffd0da');for(let i=-10;i<4;i+=3)px(x+i,FLOOR-6,1,1,'#ff9fb2')}
 function drawHomeGlow(){ctx.save();ctx.globalCompositeOperation='lighter';D().forEach(d=>{if(d.type==='jelly'){const x=d.x*S,y=(FLOOR-30)*S,r=26*S,g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(190,150,255,${L<.5?.38:.14})`);g.addColorStop(1,'rgba(190,150,255,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);return}if(d.type!=='lamp')return;const x=d.x*S,y=(FLOOR-14)*S,r=34*S,g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(255,210,120,${L<.5?.42:.18})`);g.addColorStop(1,'rgba(255,210,120,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2)});ctx.restore()}
 // ---- arcade: a game console inside the nest; Pearl Bounce is the first game ----
 function hitArcade(p){return D().some(d=>d.type==='arcade'&&Math.abs(p.x-d.x)<=7&&p.y>=FLOOR-19&&p.y<=FLOOR)}
