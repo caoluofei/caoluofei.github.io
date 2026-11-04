@@ -758,7 +758,7 @@ function update(dt){
   const m=crab.mode;
   if(m==='lift'){sfx.flail();return}
   if(view==='home'&&m!=='fall'){homeUpdate(dt);return}
-  if(m==='fall'){crab.vy+=dt*0.0012;if(FLOOR+crab.y>SURF+4)crab.vy=Math.min(crab.vy,.05);crab.y+=crab.vy*dt;
+  if(m==='fall'){const hv=st.weight>0?1+st.weight*1.3:1+st.weight*.45;crab.vy+=dt*0.0012*hv;if(FLOOR+crab.y>SURF+4&&view!=='home')crab.vy=Math.min(crab.vy,.05*hv);crab.y+=crab.vy*dt;
     if(crab.y>=0){crab.y=0;crab.tx=crab.x;setMode('idle');sfx.thud();say(pick(T('land')));lastTouch=performance.now()}
     return}
   updateFish(dt);
