@@ -248,7 +248,9 @@ const sfx=(()=>{
     brick(n){const f=600+n*60;tone(f,f*1.6,.08,'sine',.09);noise(.05,'bandpass',3000,2500,.05,2)},hard(){tone(220,200,.06,'square',.06);noise(.04,'bandpass',1200,900,.08,2)},
     power(){[660,880,1100].forEach((f,i)=>tone(f,f,.09,'triangle',.07,i*.06))},lose(){tone(500,120,.5,'sine',.1)},clear(){[523,659,784,1046].forEach((f,i)=>tone(f,f,.18,'triangle',.08,i*.1))},launch(){tone(400,900,.1,'sine',.06)},
     rattle(){for(let i=0;i<5;i++)noise(.03,'bandpass',2600+Math.random()*1200,2000,.07,4,i*.08)},pop2(){tone(500,1200,.08,'sine',.08);noise(.03,'highpass',3000,2000,.06,1)},
-    slosh(p){if(!gate('sl',95))return;noise(.14+p*.12,'lowpass',700+p*900,260,.05+p*.13,.7);noise(.08,'bandpass',1600+Math.random()*900,1100,.025+p*.05,1.5,.03);if(Math.random()<.35)tone(320+Math.random()*260,700+Math.random()*300,.06,'sine',.025+p*.03,.05)},
+    slosh(p){if(!gate('sl',70))return;const n=2+Math.round(p*4);
+      for(let i=0;i<n;i++){const f=220+Math.random()*680,r=1.5+Math.random()*.8;tone(f,f*r,.03+Math.random()*.045,'sine',.035+p*.05,Math.random()*.09)}
+      noise(.07,'bandpass',420+Math.random()*260,300,.02+p*.035,1.4,.01)},
     plop(){tone(260,720,.11,'sine',.12);noise(.08,'lowpass',1500,400,.06)},
     chime(){[660,880,1320].forEach((f,i)=>tone(f,f*1.01,.5,'sine',.1,i*.18))},
     dig(){if(!gate('dg',140))return;noise(.06,'lowpass',1200,400,.08,1)},
