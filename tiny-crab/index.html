@@ -2450,7 +2450,7 @@ function drawFloater(k, x, y, T, p) {
 function drawSeasonTint() {
   const tint = { spring: "rgba(255,180,210,.05)", summer: "rgba(255,210,130,.06)", autumn: "rgba(240,160,80,.06)", winter: "rgba(170,210,255,.08)" }[season()];
   ctx.fillStyle = tint;
-  ctx.fillRect(0, SURF * S, cv.width, (H - SURF) * S);
+  if (waterPath) ctx.fill(waterPath);
 }
 
 // ===== 07-scene.js =====
@@ -2472,7 +2472,8 @@ function makeLayer(draw, blur) {
   g.drawImage(c, 0, 0);
   return b;
 }
-let farL = null;
+let farL = null,
+  waterPath = null;
 function buildLayers() {
   farL = makeLayer(() => {
     for (let x = -6; x < W + 6; x++) {
@@ -2591,6 +2592,15 @@ function drawScene() {
     sy[x] = Math.round(SURF + wh[x] + amb);
     ctx.fillRect(x * S, sy[x] * S, S, (FLOOR - sy[x]) * S);
   }
+  // the water's outline, used to keep light rays and the season tint below the moving surface
+  waterPath = new Path2D();
+  waterPath.moveTo(0, H * S);
+  for (let x = 0; x < W; x++) {
+    waterPath.lineTo(x * S, sy[x] * S);
+    waterPath.lineTo((x + 1) * S, sy[x] * S);
+  }
+  waterPath.lineTo(W * S, H * S);
+  waterPath.closePath();
   for (let x = 0; x < W; x++) {
     px(x, sy[x], 1, 1, "#d6f7f5");
     const sl = Math.abs((sy[x + 1] ?? sy[x]) - sy[x]);
@@ -2605,8 +2615,9 @@ function drawScene() {
     if (d.vy > 0.08) px(d.x, d.y - 1, 1, 1, "rgba(214,247,245,.5)");
   });
   drawFar(T);
-  // light rays from the lamp
+  // light rays from the lamp, only inside the water
   ctx.save();
+  ctx.clip(waterPath);
   ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < 6; i++) {
     const x0 = (i * 34 + 12 + Math.sin(T * 0.0004 + i) * 6) * S;
