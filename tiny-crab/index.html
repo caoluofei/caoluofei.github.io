@@ -821,7 +821,7 @@ function loop(now){
   const r=cv.getBoundingClientRect(),k=r.width/cv.width;
   if(st.ghost&&ghost){bubble.style.left=(ghost.x*S*k)+'px';bubble.style.top=((ghost.y-geo().g.bh-6)*S*k)+'px'}else{bubble.style.left=(crab.x*S*k)+'px';bubble.style.top=((FLOOR+crab.y-24*sc())*S*k)+'px'}
   setMeter('mMood',st.mood);setMeter('mFood',st.food);setMeter('mGrow',st.lvl>=4?100:st.xp/NEED[st.lvl]*100);
-  {const wl=st.weight>.45?T('wFat'):st.weight<-.45?T('wThin'):'';lvLabel.textContent=T('stages')[st.lvl]+(wl?' · '+wl:'')}
+  lvLabel.textContent=T('stages')[st.lvl];
   tickPomo();
   requestAnimationFrame(loop);
 }
