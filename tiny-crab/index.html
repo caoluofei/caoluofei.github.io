@@ -628,6 +628,7 @@ function drawHome(T){ctx.fillStyle='#2e1f1c';ctx.fillRect(0,0,cv.width,cv.height
   const sh=(x,w,a)=>{ctx.save();ctx.translate(x*S,(FLOOR+.5)*S);ctx.scale(1,.22);const g=ctx.createRadialGradient(0,0,0,0,0,w*S);g.addColorStop(0,`rgba(50,30,20,${a})`);g.addColorStop(1,'rgba(50,30,20,0)');ctx.fillStyle=g;ctx.fillRect(-w*S,-w*S,w*2*S,w*2*S);ctx.restore()};
   list.forEach(d=>{if(!DECO[d.type].lift&&d.type!=='rug')sh(d.x,DECO[d.type].w+2,.3)});sh(crab.x,geo().g.bw/2+5,.35);
   list.forEach(drawDeco);
+  foods.forEach(f=>{px(f.x-2,f.y-2,4,3,f.gold?'#ffd23f':'#f4c95d');px(f.x-1,f.y-3,2,1,f.gold?'#fff3a8':'#f9df9a');px(f.x+2,f.y-2,1,2,'#e0a93a')});
   if(decoMode)list.forEach(d=>{const s=DECO[d.type],on=selected.has(d),b=FLOOR-(s.lift||0);ctx.lineWidth=on?3:1;ctx.strokeStyle=on?'#ffb347':'rgba(255,255,255,.6)';ctx.setLineDash(on?[]:[S,S]);ctx.strokeRect((d.x-s.w)*S,(b-s.h)*S,s.w*2*S,s.h*S);ctx.setLineDash([]);ctx.lineWidth=1})}
 function drawBlanket(){if(crab.mode!=='sleep'||crab.y>=0)return;const bed=crab.onBed;if(!bed)return;const x=Math.round(bed.x);px(x-11,FLOOR-7,15,3,'#ffb3c1');px(x-11,FLOOR-7,15,1,'#ffd0da');for(let i=-10;i<4;i+=3)px(x+i,FLOOR-6,1,1,'#ff9fb2')}
 function drawHomeGlow(){ctx.save();ctx.globalCompositeOperation='lighter';D().forEach(d=>{if(d.type==='jelly'){const x=d.x*S,y=(FLOOR-30)*S,r=26*S,g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(190,150,255,${L<.5?.38:.14})`);g.addColorStop(1,'rgba(190,150,255,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);return}if(d.type!=='lamp')return;const x=d.x*S,y=(FLOOR-14)*S,r=34*S,g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(255,210,120,${L<.5?.42:.18})`);g.addColorStop(1,'rgba(255,210,120,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2)});ctx.restore()}
@@ -730,7 +731,7 @@ function update(dt){
   crab.t+=dt;crab.modeT-=dt;crab.angerT-=dt;crab.squeeze=Math.max(0,(crab.squeeze||0)-dt);crab.blush=Math.max(0,crab.blush-dt);
   decay();
   // food falling
-  foods.forEach(f=>{if(f.y<FLOOR-1){const was=f.y;f.y=Math.min(FLOOR-1,f.y+dt/(f.y>SURF?60:18));if(was<SURF&&f.y>=SURF&&view!=='home'){sfx.plop();poke(f.x,3,1.2);splash(f.x,3,.5)}}});
+  foods.forEach(f=>{if(f.y<FLOOR-1){const was=f.y;f.y=Math.min(FLOOR-1,f.y+dt/(view==='home'?14:f.y>SURF?60:18));if(view==='home'&&f.y>=FLOOR-1&&!f.landed){f.landed=1;sfx.place()}if(was<SURF&&f.y>=SURF&&view!=='home'){sfx.plop();poke(f.x,3,1.2);splash(f.x,3,.5)}}});
   sparks.forEach(s=>{s.y-=dt/80;s.life-=dt});sparks=sparks.filter(s=>s.life>0);
 
   if(view==='arcade'){arcUpdate(dt);return}
@@ -872,7 +873,7 @@ cv.addEventListener('pointerup',e=>{if(view==='arcade'){down=null;return}if(gdra
   else if(!down.on&&down.dist<3){if(view==='home'&&hitArcade(p)){down=null;openArcade();return}if(view==='home'&&hitDoor(p)){down=null;exitHome();return}if(view==='out'&&hitNest(p)){down=null;enterHome();return}wake();const f=hitFish(p);if(f)startGift(f);else crab.tx=Math.max(view==='home'?34:16,Math.min(W-(view==='home'?16:34),p.x))}
   down=null;save()});
 
-document.getElementById('bFeed').onclick=()=>{if(view==='arcade')return;if(st.ghost){say(T('ghostHint'),2400);return}lastTouch=performance.now();crab.home=false;wake();foods.push({x:Math.max(16,Math.min(W-34,crab.x+(Math.random()*80-40))),y:0})};
+document.getElementById('bFeed').onclick=()=>{if(view==='arcade')return;if(st.ghost){say(T('ghostHint'),2400);return}lastTouch=performance.now();crab.home=false;wake();foods.push(view==='home'?{x:Math.max(36,Math.min(W-18,crab.x+(Math.random()*50-25))),y:Math.round(H*.25)}:{x:Math.max(16,Math.min(W-34,crab.x+(Math.random()*80-40))),y:0})};
 document.getElementById('bPet').onclick=()=>{if(view==='arcade')return;if(st.ghost){say(T('ghostHint'),2400);return}lastTouch=performance.now();if(!wake())pet()};
 document.getElementById('bSleep').onclick=()=>{if(view==='arcade')return;if(st.ghost){say(T('ghostHint'),2400);return}if(crab.mode==='sleep'){wake();lastTouch=performance.now()}else{crab.home=true;crab.tx=NC;lastTouch=-1e9;say(T('gohome'),1500)}};
 function notify(t){try{if(document.hidden&&'Notification' in window&&Notification.permission==='granted')new Notification(T('title'),{body:t,icon:'icon-192.png',tag:'crab'})}catch(e){}}
