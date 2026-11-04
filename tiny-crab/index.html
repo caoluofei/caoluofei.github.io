@@ -1670,6 +1670,7 @@ function drawNestFront() {
     .slice(0, 12)
     .forEach((t, i) => drawItem(t, NC - 13 + (i % 6) * 5 + (i > 5 ? 2 : 0), FLOOR - 3 - (i > 5 ? 2 : 0)));
 }
+// soft dark corners, like looking through the tank
 function drawLens() {
   const w = cv.width,
     hh = cv.height,
@@ -1678,22 +1679,6 @@ function drawLens() {
   v.addColorStop(1, "rgba(10,30,50,.32)");
   ctx.fillStyle = v;
   ctx.fillRect(0, 3 * S, w, hh - 3 * S);
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  ctx.fillStyle = `rgba(255,255,255,${0.012 + 0.025 * L})`;
-  ctx.beginPath();
-  ctx.moveTo(w * 0.08, SURF * S);
-  ctx.lineTo(w * 0.15, SURF * S);
-  ctx.lineTo(w * 0.05, hh);
-  ctx.lineTo(-w * 0.02, hh);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(w * 0.18, SURF * S);
-  ctx.lineTo(w * 0.2, SURF * S);
-  ctx.lineTo(w * 0.1, hh);
-  ctx.lineTo(w * 0.08, hh);
-  ctx.fill();
-  ctx.restore();
 }
 function drawNight() {
   if (L >= 1) return;
@@ -2643,7 +2628,6 @@ function drawScene() {
     ctx.fillStyle = lg;
     ctx.fillRect(0, 3 * S, cv.width, (SURF - 3) * S);
   }
-  px(3, 4, 1, SURF - 6, "rgba(255,255,255,.12)");
   // water body with live surface
   const g = ctx.createLinearGradient(0, SURF * S, 0, FLOOR * S);
   g.addColorStop(0, "#8fe2e6");
