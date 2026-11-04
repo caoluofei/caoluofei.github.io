@@ -212,7 +212,7 @@ const sfx=(()=>{
   const gate=(k,ms)=>{const n=performance.now();if(last[k]&&n-last[k]<ms)return false;last[k]=n;return true};
   function unlock(){if(A){if(A.state==='suspended')A.resume();return}
     try{A=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
-    M=A.createGain();M.gain.value=on?.8:0;M.connect(A.destination);
+    M=A.createGain();M.gain.value=on?.5:0;M.connect(A.destination);
     NB=A.createBuffer(1,A.sampleRate,A.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
     // aquarium hum: filtered noise loop + slow filter wobble
     const n=A.createBufferSource();n.buffer=NB;n.loop=true;const f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=260;
@@ -225,7 +225,7 @@ const sfx=(()=>{
     s.buffer=NB;s.playbackRate.value=.8+Math.random()*.4;fl.type=ft;fl.Q.value=q;fl.frequency.setValueAtTime(f0,t);fl.frequency.exponentialRampToValueAtTime(f1,t+dur);
     g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl).connect(g).connect(M);s.start(t,Math.random()*.5);s.stop(t+dur+.02)}
   return{unlock,
-    toggle(){on=!on;if(M)M.gain.value=on?.8:0;return on},
+    toggle(){on=!on;if(M)M.gain.value=on?.5:0;return on},
     splash(p){if(!gate('sp',120))return;noise(.3+p*.25,'lowpass',2200,300,.18+p*.25,.7);tone(320,110,.18,'sine',.12*p+.05);noise(.12,'bandpass',4000,2500,.06*p,2,.05)},
     bloop(){tone(380,900,.09,'sine',.08,.06)},
     drip(){if(!gate('dr',45))return;const f=1200+Math.random()*900;tone(f,f*1.8,.05,'sine',.05)},
@@ -248,9 +248,9 @@ const sfx=(()=>{
     brick(n){const f=600+n*60;tone(f,f*1.6,.08,'sine',.09);noise(.05,'bandpass',3000,2500,.05,2)},hard(){tone(220,200,.06,'square',.06);noise(.04,'bandpass',1200,900,.08,2)},
     power(){[660,880,1100].forEach((f,i)=>tone(f,f,.09,'triangle',.07,i*.06))},lose(){tone(500,120,.5,'sine',.1)},clear(){[523,659,784,1046].forEach((f,i)=>tone(f,f,.18,'triangle',.08,i*.1))},launch(){tone(400,900,.1,'sine',.06)},
     rattle(){for(let i=0;i<5;i++)noise(.03,'bandpass',2600+Math.random()*1200,2000,.07,4,i*.08)},pop2(){tone(500,1200,.08,'sine',.08);noise(.03,'highpass',3000,2000,.06,1)},
-    slosh(p){if(!gate('sl',70))return;const n=2+Math.round(p*4);
-      for(let i=0;i<n;i++){const f=220+Math.random()*680,r=1.5+Math.random()*.8;tone(f,f*r,.03+Math.random()*.045,'sine',.035+p*.05,Math.random()*.09)}
-      noise(.07,'bandpass',420+Math.random()*260,300,.02+p*.035,1.4,.01)},
+    slosh(p){if(!gate('sl',140))return;const v=.5;
+      noise(.22+p*.1,'bandpass',1400,700,(.03+p*.05)*v,.6);noise(.18,'highpass',3500,2500,(.02+p*.03)*v,.5,.02);
+      for(let i=0;i<3+Math.round(p*4);i++)noise(.015+Math.random()*.02,'bandpass',2500+Math.random()*3500,2000,(.03+p*.04)*v,2,Math.random()*.16)},
     plop(){tone(260,720,.11,'sine',.12);noise(.08,'lowpass',1500,400,.06)},
     chime(){[660,880,1320].forEach((f,i)=>tone(f,f*1.01,.5,'sine',.1,i*.18))},
     dig(){if(!gate('dg',140))return;noise(.06,'lowpass',1200,400,.08,1)},
