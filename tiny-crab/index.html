@@ -2556,7 +2556,7 @@ function newRay(r, now, first) {
   r.x = -20 + Math.random() * (W + 30);
   r.w = 3 + r.depth * 10;
   r.tilt = 0.14 + Math.random() * 0.08;
-  r.dur = 7000 + Math.random() * 9000;
+  r.dur = 14000 + Math.random() * 14000;
   r.born = now - (first ? Math.random() * r.dur : 0);
   r.peak = 0.05 + r.depth * 0.1;
   r.p = Math.random() * 6;
@@ -2582,11 +2582,11 @@ function drawRays(T) {
     const env = k < 0.25 ? k / 0.25 : k > 0.7 ? (1 - k) / 0.3 : 1,
       ease = env * env * (3 - 2 * env),
       // breathing brightness: a slow swell with a faster shimmer on top
-      flick = (0.55 + 0.45 * (0.5 + 0.5 * Math.sin(T * 0.0011 + r.p))) * (0.8 + 0.2 * Math.sin(T * 0.0041 + r.p * 2)),
+      flick = (0.55 + 0.45 * (0.5 + 0.5 * Math.sin(T * 0.0004 + r.p))) * (0.9 + 0.1 * Math.sin(T * 0.0015 + r.p * 2)),
       a = r.peak * ease * flick * bright;
     if (a < 0.002) return;
     // the ray stays put; its reach keeps growing and shrinking
-    const reach = (0.62 + 0.38 * (0.5 + 0.5 * Math.sin(T * 0.0006 + r.p * 3))) * (0.92 + 0.08 * Math.sin(T * 0.0019 + r.p)),
+    const reach = (0.62 + 0.38 * (0.5 + 0.5 * Math.sin(T * 0.00025 + r.p * 3))) * (0.94 + 0.06 * Math.sin(T * 0.0007 + r.p)),
       len = (FLOOR - SURF) * (0.55 + r.depth * 0.45) * reach,
       bottom = top + len,
       x0 = r.x * S;
