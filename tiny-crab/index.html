@@ -248,6 +248,7 @@ const sfx=(()=>{
     brick(n){const f=600+n*60;tone(f,f*1.6,.08,'sine',.09);noise(.05,'bandpass',3000,2500,.05,2)},hard(){tone(220,200,.06,'square',.06);noise(.04,'bandpass',1200,900,.08,2)},
     power(){[660,880,1100].forEach((f,i)=>tone(f,f,.09,'triangle',.07,i*.06))},lose(){tone(500,120,.5,'sine',.1)},clear(){[523,659,784,1046].forEach((f,i)=>tone(f,f,.18,'triangle',.08,i*.1))},launch(){tone(400,900,.1,'sine',.06)},
     rattle(){for(let i=0;i<5;i++)noise(.03,'bandpass',2600+Math.random()*1200,2000,.07,4,i*.08)},pop2(){tone(500,1200,.08,'sine',.08);noise(.03,'highpass',3000,2000,.06,1)},
+    slosh(p){if(!gate('sl',95))return;noise(.14+p*.12,'lowpass',700+p*900,260,.05+p*.13,.7);noise(.08,'bandpass',1600+Math.random()*900,1100,.025+p*.05,1.5,.03);if(Math.random()<.35)tone(320+Math.random()*260,700+Math.random()*300,.06,'sine',.025+p*.03,.05)},
     plop(){tone(260,720,.11,'sine',.12);noise(.08,'lowpass',1500,400,.06)},
     chime(){[660,880,1320].forEach((f,i)=>tone(f,f*1.01,.5,'sine',.1,i*.18))},
     dig(){if(!gate('dg',140))return;noise(.06,'lowpass',1200,400,.08,1)},
@@ -375,8 +376,8 @@ function physics(dt){
   const bot=FLOOR+crab.y,top=bot-17*sc(),vy=(crab.y-prevCY)/Math.max(dt,1),dx=crab.x-prevCX,inW=bot>SURF+1;
   if(prevIn&&!inW){poke(crab.x,9,-1.6);splash(crab.x,6,.8);wet=2600;sfx.splash(.4);sfx.bloop()}
   if(!prevIn&&inW){const p=Math.min(4,1+Math.abs(vy)*25);poke(crab.x,10,p);sfx.splash(Math.min(1,p/4+.25));splash(crab.x,8+Math.round(p*3),Math.min(1.6,.6+p*.3))}
-  if(top<SURF+2&&bot>SURF-1&&Math.abs(dx)>.05){const d=Math.sign(dx);poke(crab.x+d*11,3,-Math.min(1.2,Math.abs(dx)*.7));poke(crab.x-d*11,3,Math.min(1,Math.abs(dx)*.5));if(Math.random()<Math.abs(dx)*.3)splash(crab.x+d*11,1,.6)}
-  if(crab.mode==='lift'&&top<SURF+2&&bot>SURF&&Math.abs(vy)>.01)poke(crab.x,8,vy*6);
+  if(top<SURF+2&&bot>SURF-1&&Math.abs(dx)>.05){const d=Math.sign(dx);sfx.slosh(Math.min(1,Math.abs(dx)*.9));poke(crab.x+d*11,3,-Math.min(1.2,Math.abs(dx)*.7));poke(crab.x-d*11,3,Math.min(1,Math.abs(dx)*.5));if(Math.random()<Math.abs(dx)*.3)splash(crab.x+d*11,1,.6)}
+  if(crab.mode==='lift'&&top<SURF+2&&bot>SURF&&Math.abs(vy)>.01){poke(crab.x,8,vy*6);sfx.slosh(Math.min(1,Math.abs(vy)*25))}
   wet=Math.max(0,wet-dt);
   if(wet>0&&!inW&&Math.random()<dt/(90+(2600-wet)/6))drops.push({x:crab.x+Math.random()*14-7,y:bot,vx:0,vy:.01});
   drops.forEach(d=>{d.vy+=.0005*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;if(d.vy>0&&d.y>=surfY(d.x)){poke(d.x,1,.5);d.dead=1;sfx.drip()}});
