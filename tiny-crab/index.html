@@ -2546,7 +2546,8 @@ function drawFront(now) {
     ctx.fillRect(x - r, y - r, r * 2, r * 2);
   });
 }
-// ---- light rays: each one fades in, sways, fades out and comes back somewhere else ----
+// ---- light rays: each one stays in place, breathes brighter and dimmer, stretches and shrinks,
+// then fades out and comes back somewhere else ----
 // depth 0 = far (thin, faint, short), 1 = near (wide, brighter, reaches the sand)
 const rays = [];
 let rayClock = performance.now();
@@ -2580,11 +2581,13 @@ function drawRays(T) {
     }
     const env = k < 0.25 ? k / 0.25 : k > 0.7 ? (1 - k) / 0.3 : 1,
       ease = env * env * (3 - 2 * env),
-      flick = 0.85 + 0.15 * Math.sin(T * 0.0013 + r.p),
+      // breathing brightness: a slow swell with a faster shimmer on top
+      flick = (0.55 + 0.45 * (0.5 + 0.5 * Math.sin(T * 0.0011 + r.p))) * (0.8 + 0.2 * Math.sin(T * 0.0041 + r.p * 2)),
       a = r.peak * ease * flick * bright;
     if (a < 0.002) return;
-    r.x += Math.sin(T * 0.0002 + r.p) * 0.004 * dt;
-    const len = (FLOOR - SURF) * (0.5 + r.depth * 0.5),
+    // the ray stays put; its reach keeps growing and shrinking
+    const reach = (0.62 + 0.38 * (0.5 + 0.5 * Math.sin(T * 0.0006 + r.p * 3))) * (0.92 + 0.08 * Math.sin(T * 0.0019 + r.p)),
+      len = (FLOOR - SURF) * (0.55 + r.depth * 0.45) * reach,
       bottom = top + len,
       x0 = r.x * S;
     // three nested quads give a soft edge and a brighter core
