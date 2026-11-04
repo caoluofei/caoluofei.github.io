@@ -887,7 +887,7 @@ cv.addEventListener('pointerup',e=>{if(view==='arcade'){down=null;return}if(gdra
   down=null;save()});
 
 document.getElementById('bFeed').onclick=()=>{if(view==='arcade')return;if(st.ghost){say(T('ghostHint'),2400);return}lastTouch=performance.now();crab.home=false;wake();const fd=view==='home'&&D().find(d=>d.type==='feeder');
-  if(fd){if(fd._shakeUntil>performance.now())return;fd._shakeUntil=performance.now()+420;sfx.rattle();setTimeout(()=>{foods.push({x:fd.x+6,y:FLOOR-7,vx:.025+Math.random()*.03,vy:-.11-Math.random()*.04,arc:1,bounce:1});sfx.pop2()},420);return}
+  if(fd){if(fd._shakeUntil>performance.now())return;fd._shakeUntil=performance.now()+420;sfx.rattle();setTimeout(()=>{foods.push({x:fd.x+6,y:FLOOR-7-(fd._base||0),vx:.025+Math.random()*.03,vy:-.11-Math.random()*.04,arc:1,bounce:1});sfx.pop2()},420);return}
   foods.push(view==='home'?{x:Math.max(36,Math.min(W-18,crab.x+(Math.random()*50-25))),y:Math.round(H*.25)}:{x:Math.max(16,Math.min(W-34,crab.x+(Math.random()*80-40))),y:0})};
 document.getElementById('bPet').onclick=()=>{if(view==='arcade')return;if(st.ghost){say(T('ghostHint'),2400);return}lastTouch=performance.now();if(!wake())pet()};
 document.getElementById('bSleep').onclick=()=>{if(view==='arcade')return;if(st.ghost){say(T('ghostHint'),2400);return}if(crab.mode==='sleep'){wake();lastTouch=performance.now()}else{crab.home=true;crab.tx=NC;lastTouch=-1e9;say(T('gohome'),1500)}};
