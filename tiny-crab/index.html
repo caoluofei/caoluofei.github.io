@@ -3670,6 +3670,7 @@ function ghostDrop() {
   }
 }
 function revive() {
+  st.ghostTaught = true;
   st.weight = Math.min(st.weight, -0.6);
   st.ghost = false;
   ghost = null;
@@ -3746,7 +3747,8 @@ function drawHand(x, y, alpha) {
   ctx.globalAlpha = 1;
 }
 function drawGhostGuide(now) {
-  if (!st.ghost || !ghost || view !== "out") return;
+  // only until the player has brought the crab back once
+  if (!st.ghost || !ghost || view !== "out" || st.ghostTaught) return;
   const { g, top } = geo(),
     bx = crab.x,
     by = FLOOR + top + Math.floor(g.bh / 2),
